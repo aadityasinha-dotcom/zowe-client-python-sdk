@@ -1,4 +1,4 @@
-"""Zowe Python Client SDK.
+"""Zowe Client Python SDK.
 
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 import os.path
 import uuid
 
@@ -20,7 +21,7 @@ src_dir = os.path.realpath(os.path.dirname(__file__))
 uuid4 = uuid.uuid4()
 
 
-def resolve_sdk_dep(sdk_name, version_spec):
+def resolve_sdk_dep(sdk_name: str, version_spec: str) -> str:
     # if os.path.exists(os.path.join(src_dir, sdk_name, "zowe")):
     #     # Handle building from a Git checkout
     #     # Based on https://github.com/lab-cosmo/equistore/blob/master/python/equistore-torch/setup.py#L212
@@ -38,12 +39,12 @@ if __name__ == "__main__":
         long_description=open("../README.md", "r").read(),
         long_description_content_type="text/markdown",
         url="https://github.com/zowe/zowe-client-python-sdk",
-        author="Guilherme Cartier",
-        author_email="gcartier94@gmail.com",
+        author="Zowe",
+        author_email="zowe.robot@gmail.com",
         license="EPL-2.0",
         classifiers=[
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
             "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
         ],
         install_requires=[

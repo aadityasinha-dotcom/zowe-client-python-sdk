@@ -1,4 +1,4 @@
-"""Zowe Python Client SDK.
+"""Zowe Client Python SDK.
 
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ from . import session_constants
 from .logger import Log
 from .request_handler import RequestHandler
 from .session import ISession, Session
+from typing import Any, Optional, Type
 
 
 class SdkApi:
@@ -25,19 +26,24 @@ class SdkApi:
 
     Parameters
     ----------
-    profile : dict
+    profile : dict[str, Any]
         Profile information in json (dict) format
     default_url : str
         Default url used for session
     logger_name : str
         Name of the logger (same as the filename by default)
+    log : bool
+        Flag to disable logger
     """
 
-    def __init__(self, profile: dict, default_url: str, logger_name: str = __name__):
+    def __init__(self, profile: dict[str, Any], default_url: str, logger_name: str = __name__, log: bool = True):
         session = Session(profile)
         self.session: ISession = session.load()
 
         self.logger = Log.register_logger(logger_name)
+
+        if log == False:
+            Log.close(self.logger)
 
         self._default_service_url = default_url
         self._default_headers = {
@@ -51,7 +57,7 @@ class SdkApi:
             "url": self._request_endpoint,
             "headers": self._default_headers,
         }
-        self.__session_arguments = {
+        self.__session_arguments: dict[str, Any] = {
             "verify": self.session.reject_unauthorized,
             "timeout": 30,
         }
@@ -64,17 +70,20 @@ class SdkApi:
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self._default_headers["Cookie"] = f"{self.session.token_type}={self.session.token_value}"
         elif self.session.type == session_constants.AUTH_TYPE_CERT_PEM:
-            self.__session_arguments["cert"] = self.session.cert
+            cert: Optional[tuple[str, str]] = self.session.cert
+            self.__session_arguments["cert"] = cert
 
-    def __enter__(self):
+    def __enter__(self) -> "SdkApi":
         """Return the SdkApi instance."""
         return self
 
-    def __exit__(self, exc_type, exception, traceback):
+    def __exit__(
+        self, exc_type: Optional[Type[BaseException]], exception: Optional[BaseException], traceback: Optional[object]
+    ) -> None:
         """Delete the request handler before exit."""
         del self.request_handler
 
-    def _create_custom_request_arguments(self) -> dict:
+    def _create_custom_request_arguments(self) -> dict[str, Any]:
         """
         Create a copy of the default request arguments dictionary.
 
@@ -83,7 +92,7 @@ class SdkApi:
 
         Returns
         -------
-        dict
+        dict[str, Any]
             A deepcopy of the request_arguments
         """
         return copy.deepcopy(self._request_arguments)

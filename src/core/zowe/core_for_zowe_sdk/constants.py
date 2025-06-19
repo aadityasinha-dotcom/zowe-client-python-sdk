@@ -1,4 +1,4 @@
-"""Zowe Python Client SDK.
+"""Zowe Client Python SDK.
 
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -10,7 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-constants = {
+from typing import Union
+
+constants: dict[str, Union[str, int]] = {
     "SecureValuePrefix": "managed by ",
     "TsoSessionNotFound": "IZUG1126E",
     "ZoweCredentialKey": "Zowe-Plugin",

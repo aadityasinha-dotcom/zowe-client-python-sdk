@@ -2,7 +2,7 @@ import os
 import sys
 
 # Define the license header you expect in each file
-LICENSE_HEADER = '''"""Zowe Python Client SDK.
+LICENSE_HEADER = '''"""Zowe Client Python SDK.
 
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ def main():
         if "build" in root.split(os.path.sep):
             continue
         for file in files:
-            if file.endswith(".py"):
+            if file.endswith(".py") and os.path.basename(file) != "_version.py":
                 file_path = os.path.join(root, file)
                 if not check_and_add_license_header(file_path, write_header):
                     print(f"License header missing in: {file_path}")

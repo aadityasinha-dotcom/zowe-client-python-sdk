@@ -1,4 +1,4 @@
-"""Zowe Python Client SDK.
+"""Zowe Client Python SDK.
 
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
@@ -10,25 +10,29 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional
+from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 
+from .response import ConsoleResponse, IssueCommandResponse
 
-class Console(SdkApi):
+
+class Console(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF Console API.
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
        A profile in dict (json) format
+    log : bool
+        Flag to disable logger
     """
 
-    def __init__(self, connection: dict):
-        super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__)
+    def __init__(self, connection: dict[str, Any], log: bool = True):
+        super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__, log=log)
 
-    def issue_command(self, command: str, console: Optional[str] = None) -> dict:
+    def issue_command(self, command: str, console: Optional[str] = None) -> IssueCommandResponse:
         """Issues a command on z/OS Console.
 
         Parameters
@@ -40,7 +44,7 @@ class Console(SdkApi):
 
         Returns
         -------
-        dict
+        IssueCommandResponse
             A JSON containing the response from the console command
         """
         custom_args = self._create_custom_request_arguments()
@@ -48,9 +52,9 @@ class Console(SdkApi):
         request_body = {"cmd": command}
         custom_args["json"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args)
-        return response_json
+        return IssueCommandResponse(response_json)
 
-    def get_response(self, response_key: str, console: Optional[str] = None) -> dict:
+    def get_response(self, response_key: str, console: Optional[str] = None) -> ConsoleResponse:
         """
         Collect outstanding synchronous z/OS Console response messages.
 
@@ -63,11 +67,11 @@ class Console(SdkApi):
 
         Returns
         -------
-        dict
+        ConsoleResponse
             A JSON containing the response to the command
         """
         custom_args = self._create_custom_request_arguments()
         request_url = "{}/solmsgs/{}".format(console or "defcn", response_key)
         custom_args["url"] = self._request_endpoint.replace("defcn", request_url)
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        return ConsoleResponse(response_json)

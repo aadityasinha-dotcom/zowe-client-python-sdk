@@ -1,0 +1,34 @@
+name: Audit
+
+on:
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 10 * * *'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Check Python Vulnerabilities
+      uses: pypa/gh-action-pip-audit@v1.1.0
+      with:
+        inputs: requirements.txt docs/requirements.txt
+
+    - name: Check Secrets SDK Vulnerabilities
+      uses: actions-rust-lang/audit@v1
+      with:
+        denyWarnings: true
+        ignore: RUSTSEC-2024-0370,RUSTSEC-2024-0429
+        workingDirectory: src/secrets
