@@ -48,8 +48,8 @@ For more information on the available sub-packages click [HERE](https://zowe-cli
 The Zowe core package has dependencies on the packages listed below:
 
 ```
-commentjson
 deepmerge
+json5
 jsonschema
 pyyaml
 requests>=2.22
@@ -66,7 +66,7 @@ pip install -U --pre zowe.core-for-zowe-sdk[secrets]
 
 Ensure the following prerequisites are installed and on your PATH:
 
-- Python >= 3.9 and `pip`
+- Python >= 3.10 and `pip`
 - Cargo >= 1.72 (to build Rust bindings for Secrets SDK)
 - Visual Studio Build Tools >= 2015 (Windows only)
 
@@ -159,6 +159,7 @@ Currently, the Zowe Python SDK supports the following interfaces:
 - Start/End TSO address space
 - Ping TSO address space
 - Issue TSO command
+- z/OSMF Workflows
 
 **Important**: Notice that the below examples assume that you have already created
 an object for the sub-package of your preference just like in the quickstart example.

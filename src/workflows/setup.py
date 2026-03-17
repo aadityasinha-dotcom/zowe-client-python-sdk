@@ -19,9 +19,9 @@ from _version import __version__
 from setup import resolve_sdk_dep
 
 setup(
-    name="zowe_zos_tso_for_zowe_sdk",
+    name="zowe_workflows_for_zowe_sdk",
     version=__version__,
-    description="Zowe Python SDK - z/OS TSO package",
+    description="Zowe Python SDK - z/OSMF Workflows package",
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/zowe/zowe-client-python-sdk",

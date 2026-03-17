@@ -2,15 +2,47 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
-## Recent Changes
+## `1.0.0-dev25`
 
-- Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
+- Support responseTimeout profile property for z/OSMF operations. [#369](https://github.com/zowe/zowe-client-python-sdk/pull/369)
+
+### Enhancements
+
+- Clarification of return types for `DatasetListResponse` and `USSListResponse`. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
+- Added `USSFiles.retrieve_content` as a substitution of `USSFiles.get_content` and `USSFiles.get_content_streamed`, `USSFiles.perform_download` as a substitution of `USSFiles.download`, `USSFiles.perform_upload` as a substitution of `USSFiles.upload`, `Datasets.retrieve_content` as a substitution of `Datasets.get_content` and `Datasets.get_binary_content`, `Datasets.perform_download` as a substitution of `Datasets.download` and `Datasets.download_binary`, `Datasets.perform_upload` as a substitution of `Datasets.upload`. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
+- Added `ContentType` enum class to distinguish between data types to submit / retrieve. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
+- Added binary USS files upload and write. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
+- Added `USSFiles.get_file_tag` function. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
+
+### Bug Fixes
+
+- Added support for the `file_encoding` and `receive_encoding` to the `USSFiles.get_content`, `USSFiles.get_content_streamed`, and `USSFiles.download` functions. [#375](https://github.com/zowe/zowe-client-python-sdk/issues/375), [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
+- Updated the `urllib3` dependency of the Core SDK for technical currency. [#381](https://github.com/zowe/zowe-client-python-sdk/pull/381)
+- Fixed bug where `Tso.issue_command` method sometimes returned "READY" message without command output. [#386](https://github.com/zowe/zowe-client-python-sdk/pull/386)
+
+## `1.0.0-dev24`
+
+### Enhancements
+
+- Added z/OSMF Workflows functionality. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
+- Replaced the `commentjson` package with the `json5` package to support block comments.  [#374](https://github.com/zowe/zowe-client-python-sdk/pull/374)
+
+### Bug Fixes
+
+- Added support for the `encoding` option to the `USSFiles.upload` function. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
+
+## `1.0.0-dev23`
+
+### Enhancements
+
 - Removed the `suppress_config_file_warnings` parameter from individual functions. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
 - Introduced the class-wide property `suppress_config_file_warnings` to control configuration file warnings. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
 
 ### Bug Fixes
 
+- Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#355](https://github.com/zowe/zowe-client-python-sdk/pull/355)
+- Updated the `urllib3` dependency of the Core SDK for technical currency. [#370](https://github.com/zowe/zowe-client-python-sdk/pull/370)
 
 ## `1.0.0-dev22`
 

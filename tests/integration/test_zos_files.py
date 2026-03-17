@@ -32,6 +32,7 @@ class TestFilesIntegration(unittest.TestCase):
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
         self.test_ds_upload = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER_NEW"]})'
         self.test_uss_upload = self.files_fixtures["TEST_USS_NEW"]
+        self.test_uss_create = self.files_fixtures["TEST_USS_NEW_CREATE"]
         self.test1_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST1_ZFS"]}'
         self.test2_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST2_ZFS"]}'
         self.create_zfs_options = {"perms": 755, "cylsPri": 10, "cylsSec": 2, "timeout": 20}
@@ -109,32 +110,50 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertTrue(command_output == None)
 
     def test_mount_unmount_zfs_file_system(self):
-        """Mounting a zfs filesystem should be possible"""
-        username = self.user_name.lower()
+        """Test mounting and unmounting, with safety nets."""
         mount_point = self.files_fixtures["TEST_USS_MOUNT"]
+        
+        # Create and register safety cleanup
+        self.files.fs.create(self.test2_zfs_file_system, self.create_zfs_options)
+        self.addCleanup(self._safe_delete_fs, self.test2_zfs_file_system)
 
-        # Create a zfs file system
-        zfs_file_system = self.files.fs.create(self.test2_zfs_file_system, self.create_zfs_options)
+        # Mount and register safety cleanup
+        self.files.fs.mount(self.test2_zfs_file_system, mount_point, self.mount_zfs_file_system_options)
+        self.addCleanup(self._safe_unmount_fs, self.test2_zfs_file_system)
 
-        # Mount file system
-        command_output = self.files.fs.mount(
-            self.test2_zfs_file_system, mount_point, self.mount_zfs_file_system_options
-        )
-        self.assertTrue(command_output == None)
-
-        # List a zfs file system
+        # Verify mount success
         command_output = self.files.fs.list(file_system_name=self.test2_zfs_file_system.upper())
-        self.assertTrue(len(command_output["items"]) > 0)
+        self.assertGreater(len(command_output["items"]), 0)
 
-        # Unmount file system
-        command_output = self.files.fs.unmount(self.test2_zfs_file_system)
-        self.assertTrue(command_output == None)
+        # Verify unmount success
+        unmount_response = self.files.fs.unmount(self.test2_zfs_file_system)
+        self.assertIsNone(unmount_response)
 
-        # Delete file system
-        command_output = self.files.fs.delete(self.test2_zfs_file_system)
-        self.assertTrue(command_output == None)
+        # Verify delete success
+        delete_response = self.files.fs.delete(self.test2_zfs_file_system)
+        self.assertIsNone(delete_response)
+
+    def _safe_unmount_fs(self, fs_name):
+        """Idempotent helper: Unmounts but ignores errors if already unmounted."""
+        try:
+            self.files.fs.unmount(fs_name)
+        except Exception:
+            pass 
+
+    def _safe_delete_fs(self, fs_name):
+        """Idempotent helper: Deletes but ignores errors if already deleted."""
+        try:
+            self.files.fs.delete(fs_name)
+        except Exception:
+            pass
 
     def test_upload_download_delete_dataset(self):
+        try: # small cleanup in case if the test was failed previously
+            self.files.ds.delete(self.files_fixtures["TEST_PDS"], member_name=self.files_fixtures["TEST_MEMBER_NEW"])
+            os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+        except Exception:
+            pass
+
         self.files.ds.upload_file(SAMPLE_JCL_FIXTURE_PATH, self.test_ds_upload)
         self.files.ds.download(self.test_ds_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
 
@@ -148,6 +167,12 @@ class TestFilesIntegration(unittest.TestCase):
         os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
 
     def test_upload_download_delete_uss(self):
+        try: # small cleanup in case if the test was failed previously
+            self.files.uss.delete(self.test_uss_upload)
+            os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+        except Exception:
+            pass
+
         self.files.uss.upload(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
         self.files.uss.download(self.test_uss_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
         with open(SAMPLE_JCL_FIXTURE_PATH, "r") as in_file:
@@ -158,3 +183,15 @@ class TestFilesIntegration(unittest.TestCase):
 
         self.files.uss.delete(self.test_uss_upload)
         os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+
+    def test_create_write_get_content_delete_uss(self):
+        try: # small cleanup in case if the test was failed previously
+            self.files.uss.delete(self.test_uss_create)
+        except Exception:
+            pass
+
+        self.files.uss.create(self.test_uss_create, "file")
+        self.files.uss.write(self.test_uss_create, "हैलो वर्ल्ड", encoding="IBM-1047")
+        curr_content = self.files.uss.get_content(self.test_uss_create, file_encoding="UTF-8", receive_encoding="UTF-8")
+        self.assertEqual(curr_content, "हैलो वर्ल्ड")
+        self.files.uss.delete(self.test_uss_create)

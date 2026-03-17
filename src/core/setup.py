@@ -30,16 +30,16 @@ setup(
     license="EPL-2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     ],
     install_requires=[
-        "commentjson~=0.9.0",
         "deepmerge~=1.1.0",
-        "jsonschema~=4.17.3",
+        "json5~=0.12.1",
+        "jsonschema~=4.25.1",
         "pyyaml~=6.0.1",
         "requests~=2.32.0",
-        "urllib3~=1.26.18",
+        "urllib3>=1.21.1,<3",  # Same version range that `requests` uses
     ],
     extras_require={"secrets": [resolve_sdk_dep("secrets", "~=1.0.0.dev")]},
     packages=find_namespace_packages(include=["zowe.*"]),
