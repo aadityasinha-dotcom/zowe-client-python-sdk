@@ -11,10 +11,12 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Union, Any
+from typing import Any, Union
 
 import json5
 from jsonschema import validate
+
+REMOTE_SCHEMA_UNSUPPORTED = "Loading a JSON schema from a remote URL is not supported"
 
 
 def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_schema_json: str, cwd: str) -> None:
@@ -38,7 +40,7 @@ def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_sche
     # remote ($schema pointing to an http(s):// URL) schema loading is not supported; only local files may be used
     if path_schema_json.startswith("https://") or path_schema_json.startswith("http://"):
         raise ValueError(
-            f"Loading a JSON schema from a remote URL is not supported: {path_schema_json}. "
+            f"{REMOTE_SCHEMA_UNSUPPORTED}: {path_schema_json}. "
             "Use a local file path for the $schema property instead."
         )
 

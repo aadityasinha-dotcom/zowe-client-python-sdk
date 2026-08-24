@@ -25,7 +25,7 @@ from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
 from .logger import Log
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
-from .validators import validate_config_json
+from .validators import REMOTE_SCHEMA_UNSUPPORTED, validate_config_json
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -181,8 +181,8 @@ class ConfigFile:
         if schema.startswith(("https://", "http://")):
             # remote schema loading is not supported
             if not self.__suppress_config_file_warnings:
-                warnings.warn(f"Loading a JSON schema from a remote URL is not supported: {schema}")
-                self.__logger.warning(f"Loading a JSON schema from a remote URL is not supported: {schema}")
+                warnings.warn(f"{REMOTE_SCHEMA_UNSUPPORTED}: {schema}")
+                self.__logger.warning(f"{REMOTE_SCHEMA_UNSUPPORTED}: {schema}")
             return []
 
         elif schema.startswith("file://") or os.path.isfile(schema):
