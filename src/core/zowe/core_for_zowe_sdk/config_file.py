@@ -441,8 +441,6 @@ class ConfigFile:
     def __load_secure_properties(self) -> None:
         """Inject secure properties that have been loaded from the vault into the profiles object."""
         secure_props = CredentialManager.secure_props.get(self.filepath or "", {})
-        if self.profiles is None:
-            return
         for key, value in secure_props.items():
             segments = [name for i, name in enumerate(key.split(".")) if i % 2 == 1]
             property_name = segments.pop()
