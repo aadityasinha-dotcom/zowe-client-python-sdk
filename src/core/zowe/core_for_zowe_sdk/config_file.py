@@ -169,6 +169,11 @@ class ConfigFile:
         -------
         list[dict[str, Any]]
             properties from schema
+
+        Raises
+        ------
+        ValueError
+            When the $schema property points to a remote URL, which is not supported
         """
         schema: Optional[Union[str, dict[str, Any]]] = self.schema_property
 
@@ -180,10 +185,7 @@ class ConfigFile:
 
         if schema.startswith(("https://", "http://")):
             # remote schema loading is not supported
-            if not self.__suppress_config_file_warnings:
-                warnings.warn(f"{REMOTE_SCHEMA_UNSUPPORTED}: {schema}")
-                self.__logger.warning(f"{REMOTE_SCHEMA_UNSUPPORTED}: {schema}")
-            return []
+            raise ValueError(f"{REMOTE_SCHEMA_UNSUPPORTED}: {schema}")
 
         elif schema.startswith("file://") or os.path.isfile(schema):
             try:
