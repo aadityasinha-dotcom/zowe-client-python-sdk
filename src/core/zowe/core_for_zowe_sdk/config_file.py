@@ -19,14 +19,13 @@ from dataclasses import dataclass, field
 from typing import Any, NamedTuple, Optional, Union
 
 import json5
-import requests
 
 from .credential_manager import CredentialManager
 from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
 from .logger import Log
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
-from .validators import validate_config_json
+from .validators import REMOTE_SCHEMA_UNSUPPORTED, validate_config_json
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -170,6 +169,11 @@ class ConfigFile:
         -------
         list[dict[str, Any]]
             properties from schema
+
+        Raises
+        ------
+        ValueError
+            When the $schema property points to a remote URL, which is not supported
         """
         schema: Optional[Union[str, dict[str, Any]]] = self.schema_property
 
@@ -180,15 +184,8 @@ class ConfigFile:
         schema_json: dict[str, Any] = {}
 
         if schema.startswith(("https://", "http://")):
-            try:
-                response = requests.get(schema)
-                response.raise_for_status()  # Ensure it's a valid response
-                schema_json = response.json()
-            except requests.RequestException as e:
-                if not self.__suppress_config_file_warnings:
-                    warnings.warn(f"Invalid schema request: {e}")
-                    self.__logger.warning(f"Invalid schema request: {e}")
-                return []
+            # remote schema loading is not supported
+            raise ValueError(f"{REMOTE_SCHEMA_UNSUPPORTED}: {schema}")
 
         elif schema.startswith("file://") or os.path.isfile(schema):
             try:
