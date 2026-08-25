@@ -383,7 +383,7 @@ class ConfigFile:
         for k, v in profiles.items():
             if not isinstance(v, dict):  # Ensure v is a dictionary
                 if not self.__suppress_config_file_warnings:
-                    self.__logger.warning("Invalid profile passed when schame validation is off")
+                    self.__logger.warning("Invalid profile passed when schema validation is off")
                 continue  # Skip invalid entries
 
             if segments[0] == k:
@@ -443,20 +443,10 @@ class ConfigFile:
         secure_props = CredentialManager.secure_props.get(self.filepath or "", {})
         for key, value in secure_props.items():
             segments = [name for i, name in enumerate(key.split(".")) if i % 2 == 1]
-            profiles_obj = self.profiles
             property_name = segments.pop()
-            for i, profile_name in enumerate(segments):
-                if profiles_obj is None or not isinstance(profiles_obj, dict):
-                    break
-                if profile_name in profiles_obj:
-                    profiles_obj = profiles_obj[profile_name]
-                    if not isinstance(profiles_obj, dict):
-                        break
-                    if i == len(segments) - 1:
-                        profiles_obj.setdefault("properties", {})
-                        profiles_obj["properties"][property_name] = value
-                else:
-                    break
+            profile = self.find_profile(".".join(segments), self.profiles)
+            if profile is not None:
+                profile.setdefault("properties", {})[property_name] = value
 
     def __extract_secure_properties(
         self, profiles_obj: dict[str, Any], json_path: Optional[str] = "profiles"
