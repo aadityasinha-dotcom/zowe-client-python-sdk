@@ -149,9 +149,13 @@ class SdkApi:
         """
         Encode a z/OS resource (dataset, job, or volser) path for the path component of a URI.
 
-        None of the documented z/OS resource naming special characters require encoding
-        to be processed successfully by z/OSMF. API-ML rejects a literal "#" with an
-        HTTP 400 error unless it is encoded, so it is the only character adjusted here.
+        Dot-segments are resolved against the service root so a caller-supplied name such as
+        "../../restjobs/jobs/OTHER" always resolves to a path under the intended resource. A
+        literal "?" is always percent-encoded so a name such as "X?fsname=Y" is parsed as a
+        single path value rather than a path followed by query parameters. None of the other
+        documented z/OS resource naming special characters require encoding to be processed
+        successfully by z/OSMF. API-ML rejects a literal "#" with an HTTP 400 error unless it is
+        encoded, so it is also adjusted here when routed through API-ML.
 
         Parameters
         ----------
@@ -161,11 +165,15 @@ class SdkApi:
         Returns
         -------
         str
-            The path, with "#" encoded when the session is routed through API-ML
+            The normalized path, with "?" always encoded and "#" encoded when the session is
+            routed through API-ML
         """
+        # Normalizing against root collapses ".." segments without escaping the service path
+        normalized = posixpath.normpath("/" + zos_uri_path).lstrip("/")
+        encoded = normalized.replace("?", "%3F")
         if self._is_using_apiml():
-            return zos_uri_path.replace("#", "%23")
-        return zos_uri_path
+            encoded = encoded.replace("#", "%23")
+        return encoded
 
     def _encode_uri_path_for_uss(self, uss_uri_path: str) -> str:
         """

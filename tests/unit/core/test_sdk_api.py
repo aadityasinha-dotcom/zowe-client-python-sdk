@@ -135,6 +135,21 @@ class TestSdkApiClass(TestCase):
 
         self.assertEqual(sdk_api._encode_uri_path_for_zos("MY.DS#NAME$HERE"), "MY.DS%23NAME$HERE")
 
+    def test_encode_uri_path_for_zos_encodes_question_mark(self):
+        """A literal '?' must be encoded so the name is parsed as a single path value, not a query string."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_zos("X?fsname=Y"), "X%3Ffsname=Y")
+
+    def test_encode_uri_path_for_zos_resolves_dot_segments(self):
+        """Dot-segments must be resolved against the service root so the request always targets the intended resource."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertEqual(
+            sdk_api._encode_uri_path_for_zos("../../restjobs/jobs/OTHERJOB/JOB00001"),
+            "restjobs/jobs/OTHERJOB/JOB00001",
+        )
+
     def test_encode_uri_path_for_uss_normalizes_path(self):
         """USS paths should be normalized and stripped of their leading slash."""
         sdk_api = SdkApi(self.basic_props, self.default_url)
