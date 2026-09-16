@@ -203,6 +203,8 @@ class TestSdkApiClass(TestCase):
         self.assertFalse(sdk_api._is_uri_encoded("u/my file.txt"))
         self.assertFalse(sdk_api._is_uri_encoded("u/100% done"))
         self.assertFalse(sdk_api._is_uri_encoded("u/a%zzb"))
+        # A literal "+" must not be mistaken for an encoded space
+        self.assertFalse(sdk_api._is_uri_encoded("u/a+b"))
 
     def test_encode_uri_path_for_zos_skips_encoded_path(self):
         """An already-encoded z/OS path must not be encoded a second time."""

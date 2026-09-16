@@ -12,16 +12,13 @@ Copyright Contributors to the Zowe Project.
 
 import copy
 import posixpath
-import re
-import urllib
+import urllib.parse
 
 from . import session_constants
 from .logger import Log
 from .request_handler import RequestHandler
 from .session import ISession, Session
 from typing import Any, Optional, Type
-
-_PERCENT_ENCODED_PATTERN = re.compile(r"%[0-9A-Fa-f]{2}")
 
 _USS_CHARS_TO_ENCODE = {" ": "%20", "%": "%25", "+": "%2B", "?": "%3F"}
 
@@ -151,9 +148,9 @@ class SdkApi:
         """
         Determine whether a path is already percent-encoded.
 
-        A path is treated as encoded when it contains at least one percent-encoded sequence.
-        A literal percent sign that is not followed by two hex digits, such as the one in the
-        USS file name "100% done", is not an encoded sequence and does not make a path encoded.
+        A path is treated as encoded when decoding it changes it. A literal percent sign that
+        is not followed by two hex digits, such as the one in the USS file name "100% done",
+        does not decode to anything and so does not make a path encoded.
 
         Parameters
         ----------
@@ -165,7 +162,8 @@ class SdkApi:
         bool
             True if the path contains a percent-encoded sequence, False otherwise
         """
-        return bool(_PERCENT_ENCODED_PATTERN.search(uri_path))
+        # unquote, not unquote_plus: "+" is a literal that USS paths must still encode as %2B
+        return urllib.parse.unquote(uri_path) != uri_path
 
     def _encode_uri_path_for_zos(self, zos_uri_path: str) -> str:
         """
